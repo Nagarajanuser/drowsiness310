@@ -66,7 +66,10 @@ def send_whatsapp_message(message):
 # ============================================================
 
 pygame.mixer.init()
-pygame.mixer.music.load("audio/sound2.mp3")  # Add your alarm file
+yawn_sound = pygame.mixer.Sound("audio/yawn_warning.mp3")
+sleep_sound = pygame.mixer.Sound("audio/sleep_alert.mp3")
+
+#pygame.mixer.music.load("audio/sleep_alert.mp3")  # Add your alarm file  sleep_alert.mp3  yawn_warning.mp3
 
 # ============================================================
 # MEDIAPIPE INITIALIZATION
@@ -154,10 +157,14 @@ EAR_THRESHOLD = 0.22
 MOUTH_THRESHOLD = 20
 
 SLEEP_FRAMES = 20
-YAWN_FRAMES = 15
+YAWN_FRAMES = 5
 
 sleep_counter = 0
 yawn_counter = 0
+
+last_sleep_alert_time = 0
+sleep_audio_playing = False
+sleep_audio_start_time = 0
 
 # ============================================================
 # MAIN LOOP
@@ -248,9 +255,7 @@ while True:
             # =================================================
 
             if avg_ear < EAR_THRESHOLD:
-
                 sleep_counter += 1
-                #cv2.putText(image, text, position, font, font_scale, color, thickness)
                 cv2.putText(
                     frame,
                     "EYES CLOSED",
@@ -260,9 +265,7 @@ while True:
                     (0, 0, 255),
                     3
                 )
-
                 if sleep_counter > SLEEP_FRAMES:
-                    #cv2.putText(image, text, position, font, font_scale, color, thickness)
                     cv2.putText(
                         frame,
                         "DROWSINESS ALERT!",
@@ -272,26 +275,25 @@ while True:
                         (0, 0, 255),
                         4
                     )
-                    
-                    
+                    # -------------------------------------------------
+                    # STOP YAWN SOUND IMMEDIATELY
+                    # because sleep alert has HIGH PRIORITY
+                    # -------------------------------------------------
+                    if yawn_sound.get_num_channels():
+                        yawn_sound.stop()
+                        print("Yawn Audio Stopped")
 
-                    if not pygame.mixer.music.get_busy():
-
-                        # Play alarm for 15 seconds
-                        pygame.mixer.music.play()
-                        alarm_start_time = time.time()
-                        while time.time() - alarm_start_time < 15:
-                            # Keep window responsive
-                            cv2.imshow("Driver Drowsiness Detection", frame)
-                            if cv2.waitKey(1) == 27:
-                                break
-                        pygame.mixer.music.stop()
-                        #response = requests.post(url, data=data)  # to telegram
-                        #send_whatsapp_message(message)             # to whatsapp
+                    # -------------------------------------------------
+                    # PLAY SLEEP SOUND
+                    # -------------------------------------------------
+                    if not sleep_sound.get_num_channels():
+                        sleep_sound.play(maxtime=10000)  # Play for a maximum of 10 seconds
+                        print("Sleep Alert Audio Playing")
+                        response = requests.post(url, data=data) # to telegram
+                        send_whatsapp_message(message) # to whatsapp
 
             else:
                 sleep_counter = 0
-                pygame.mixer.music.stop()
 
             # =================================================
             # YAWN DETECTION
@@ -300,7 +302,6 @@ while True:
             if mouth_open > MOUTH_THRESHOLD:
 
                 yawn_counter += 1
-
                 cv2.putText(
                     frame,
                     "YAWNING",
@@ -310,6 +311,19 @@ while True:
                     (255, 255, 0),
                     3
                 )
+
+                if yawn_counter > YAWN_FRAMES:
+
+                    # -------------------------------------------------
+                    # ONLY PLAY YAWN SOUND
+                    # IF SLEEP SOUND IS NOT PLAYING
+                    # -------------------------------------------------
+
+                    if not sleep_sound.get_num_channels():
+
+                        if not yawn_sound.get_num_channels():
+                            yawn_sound.play(maxtime=10000)  # Play for a maximum of 10 seconds
+                            print("Yawn Warning Audio Playing")
 
             else:
                 yawn_counter = 0
