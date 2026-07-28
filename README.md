@@ -10,8 +10,7 @@ An **Edge AI Real-Time Computer Vision & Fatigue Monitoring System** engineered 
 
 ---
 
-## 📌 Executive Summary & HR/Technical Overview
-
+## 📌 Executive Summary
 ### 🎯 Value Proposition
 Driver fatigue and micro-sleeps contribute to over **20% of commercial fleet accidents worldwide**. Traditional monitoring systems rely on intrusive wearable gear or basic 2D landmark detection that fails under low-light conditions.
 
@@ -38,7 +37,7 @@ graph TD
         IR["💡 850nm IR LEDs<br/>(Night Driving Support)"]
         CV_CAP["PyOpenCV Capture Engine<br/>cv2.VideoCapture(0)"]
         CAM --> CV_CAP
-        IR -. Illumination .-> CAM
+        IR -.->|Illumination| CAM
     end
 
     %% Preprocessing & Feature Extraction Layer
@@ -73,12 +72,12 @@ graph TD
         
         EAR_CALC --> EAR_EVAL
         MOR_CALC --> MOR_EVAL
-        MP_MESH -- No Face --.-> NO_FAC
+        MP_MESH -.->|No Face| NO_FAC
         
-        EAR_EVAL -- Yes --> SLEEP_CTR
-        EAR_EVAL -- No --> RESET_S["Reset Sleep Counter"]
-        MOR_EVAL -- Yes --> YAWN_CTR
-        MOR_EVAL -- No --> RESET_Y["Reset Yawn Counter"]
+        EAR_EVAL -->|Yes| SLEEP_CTR
+        EAR_EVAL -->|No| RESET_S["Reset Sleep Counter"]
+        MOR_EVAL -->|Yes| YAWN_CTR
+        MOR_EVAL -->|No| RESET_Y["Reset Yawn Counter"]
     end
 
     %% Dispatch & Action Layer
@@ -88,10 +87,10 @@ graph TD
         TELEGRAM["Telegram Bot API<br/>(Instant Alert Notification)"]
         WHATSAPP["Twilio WhatsApp REST API<br/>(Fleet Control Alert)"]
 
-        SLEEP_CTR -- Counter Exceeded --> AUDIO_ENG
-        YAWN_CTR -- Counter Exceeded --> AUDIO_ENG
-        SLEEP_CTR -- Alarm Event --> TELEGRAM
-        SLEEP_CTR -- Alarm Event --> WHATSAPP
+        SLEEP_CTR -->|Counter Exceeded| AUDIO_ENG
+        YAWN_CTR -->|Counter Exceeded| AUDIO_ENG
+        SLEEP_CTR -->|Alarm Event| TELEGRAM
+        SLEEP_CTR -->|Alarm Event| WHATSAPP
         
         EAR_CALC --> HUD
         MOR_CALC --> HUD
@@ -313,6 +312,38 @@ This project demonstrates expertise in:
 
 ---
 
-## 📜 License
+## 📜 Features
 
-Distributed under the MIT License. See `LICENSE` for details.
+1. Eye Close Detection
+2. Yawn Detection
+3. Head Tilt Detection
+4. Face Presence Detection
+5. Sleep Alert
+6. Night Driving Support (with NoIR Camera)
+
+---
+
+
+## 📜 Recomended Hardwares
+
+1. Raspberry Pi 5
+2. Pi Camera Module 3 NoIR
+3. 850nm Infrared LEDs
+4. Buzzer
+
+---
+
+
+## 📜 Requird Libraray
+
+1. opencv-python
+2. mediapipe
+3. numpy
+4. scipy
+5. pygame
+6. twilio
+7. requests
+
+pip install opencv-python mediapipe numpy scipy pygame
+
+---
