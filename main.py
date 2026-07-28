@@ -289,8 +289,8 @@ while True:
                     if not sleep_sound.get_num_channels():
                         sleep_sound.play(maxtime=10000)  # Play for a maximum of 10 seconds
                         print("Sleep Alert Audio Playing")
-                        response = requests.post(url, data=data) # to telegram
-                        send_whatsapp_message(message) # to whatsapp
+                        #response = requests.post(url, data=data) # to telegram
+                        #send_whatsapp_message(message) # to whatsapp
 
             else:
                 sleep_counter = 0
